@@ -16,10 +16,12 @@ class DataType(str, Enum):
 
 class AbstractPuzzleSolver(ABC):
     day: int
+    year: int
     data_type: DataType
     lines: list[str]
 
-    def __init__(self, day: int, data_type: DataType):
+    def __init__(self, year: int, day: int, data_type: DataType):
+        self.year = year
         self.day = day
         self.data_type = data_type
         self.__get_puzzle_data()
@@ -31,7 +33,8 @@ class AbstractPuzzleSolver(ABC):
     def __get_puzzle_data(self) -> list[str]:
         data_file = (
             Path(__file__).parent.parent
-            / "days"
+            / "solutions"
+            / str(self.year)
             / f"day{self.day:02d}"
             / f"{self.data_type.value}.txt"
         )
@@ -73,19 +76,26 @@ def create_empty_file(file_path: Path) -> None:
         print(f"[rouge]File [bold]{file_path.name}[/bold] already exists.[/rouge]")
 
 
-def get_input(day: int) -> str | None:
+def get_input(day: int, year: int) -> str | None:
+
     if not (session_id := os.getenv("AOC_SESSION_ID")):
-        print(f"[rouge]No session ID found, input can't be retrieved from AoC[/rouge]")
-        return
+        print("[red]No session ID found, input can't be retrieved from AoC.[/red]")
+        return None
 
-    input_url = f"{os.getenv('AOC_BASE_URL')}/day/{day}/input"
-    print(f"Retrieving input data from AoC...")
+    input_url = f"https://adventofcode.com/{year}/day/{day}/input"
     response = httpx.get(input_url, cookies={"session": session_id})
-    if response.status_code != httpx.codes.OK:
-        print(f"[red]Error from AoC when retrieving input : {response}[/red]")
-        return
 
-    print(f"[green]Input data retrieved from AoC ![/green]")
+    if response.status_code == httpx.codes.NOT_FOUND:
+        print(
+            f"[yellow]Skipping fetch. Input for day {day} of year {year} is not available yet.[/yellow]"
+        )
+        return None
+
+    if response.status_code != httpx.codes.OK:
+        print(f"[red]Error from AoC when retrieving input: {response}[/red]")
+        return None
+
+    print(f"[green]Input data retrieved from AoC![/green]")
     return response.text
 
 
@@ -95,13 +105,13 @@ class AnswerResult(Enum):
     WRONG_ANSWER = auto()
 
 
-def submit_answer(day: int, task: int, answer: int) -> AnswerResult | None:
+def submit_answer(day: int, year: int, task: int, answer: int) -> AnswerResult | None:
     if not (session_id := os.getenv("AOC_SESSION_ID")):
         print(f"[rouge]No session ID found, input can't be retrieved from AoC[/rouge]")
         return
 
     print(f"Submitting answer for task {task} to AoC...")
-    submit_url = f"{os.getenv('AOC_BASE_URL')}/day/{day}/answer"
+    submit_url = f"https://adventofcode.com/{year}/day/{day}/input"
     response = httpx.post(
         submit_url,
         cookies={"session": session_id},

@@ -1,7 +1,7 @@
 [project]
-name = "advent_of_code_20XX"
+name = "advent_of_code_template"
 version = "1.0.0"
-description = "Advent of Code 20XX solutions in Python"
+description = "Advent of Code Template in Python"
 license = {file = "LICENSE"}
 authors = [
   {name = "Valentin PORCHET", email = "valentin.porchet@proton.me"}
@@ -13,6 +13,7 @@ dependencies = [
     "pyinstrument==5.0.*",
     "python-dotenv==1.0.*",
     "httpx>=0.27.2",
+    "rich>=13.9.4",
 ]
 
 [tool.uv]
