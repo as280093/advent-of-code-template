@@ -8,13 +8,8 @@ from pyinstrument import Profiler
 from rich import print
 from typing_extensions import Annotated
 
-from scripts.utils import (
-    AnswerResult,
-    DataType,
-    create_empty_file,
-    get_input,
-    submit_answer,
-)
+from scripts.utils import (AnswerResult, DataType, create_empty_file,
+                           get_input, submit_answer)
 
 app = typer.Typer()
 
@@ -44,6 +39,12 @@ def run(
 
     if day < 1 or day > 25:
         print("[red]Day must be between 1 and 25.[/red]")
+        raise typer.Exit(1)
+
+    try:
+        data_type = DataType(data_type)
+    except ValueError:
+        print(f"[red]Invalid data type: {data_type}. Must be 'input' or 'example'.[/red]")
         raise typer.Exit(1)
 
     try:
